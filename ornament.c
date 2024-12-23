@@ -182,10 +182,10 @@ SDL_AppResult SDL_AppIterate(void *appstate)
             }
         }
 
-        const THEORAPLAY_AudioPacket *audio = THEORAPLAY_getAudio(decoder);
-        if (audio) {
-            const SDL_AudioSpec spec = { SDL_AUDIO_F32, audio->channels, audio->freq };
+        const THEORAPLAY_AudioPacket *audio;
+        while ((audio = THEORAPLAY_getAudio(decoder)) != NULL) {
             if (!audio_ready) {
+                const SDL_AudioSpec spec = { SDL_AUDIO_F32, audio->channels, audio->freq };
                 SDL_SetAudioStreamFormat(audio_stream, &spec, NULL);
                 SDL_ResumeAudioStreamDevice(audio_stream);
                 audio_ready = true;
