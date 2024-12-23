@@ -15,8 +15,8 @@ static const THEORAPLAY_VideoFrame *pending_frame = NULL;
 static THEORAPLAY_Io theora_io;
 static Uint64 baseticks = 0;
 static bool audio_ready = false;
-static Uint8 idle_intensity = 0;
-static Uint8 idle_intensity_incr = 1;
+static int idle_intensity = 0;
+static int idle_intensity_incr = 1;
 
 static long theoraplayiobridge_read(THEORAPLAY_Io *io, void *buf, long buflen)
 {
@@ -200,7 +200,7 @@ SDL_AppResult SDL_AppIterate(void *appstate)
         if ( ((idle_intensity_incr > 0) && (idle_intensity == 255)) || ((idle_intensity_incr < 0) && (idle_intensity == 0)) ) {
             idle_intensity_incr = -idle_intensity_incr;
         }
-        SDL_SetRenderDrawColor(renderer, 0, 0, idle_intensity, 255);
+        SDL_SetRenderDrawColor(renderer, 0, 0, (Uint8) idle_intensity, 255);
         SDL_RenderClear(renderer);
     } else {
         SDL_SetRenderDrawColorFloat(renderer, 0.0f, 0.0f, 0.0f, 1.0f);
