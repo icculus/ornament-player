@@ -17,6 +17,7 @@ static Uint64 baseticks = 0;
 static bool audio_ready = false;
 static int idle_intensity = 0;
 static int idle_intensity_incr = 1;
+static Uint64 decode_finished_ticks = 0;
 
 static long theoraplayiobridge_read(THEORAPLAY_Io *io, void *buf, long buflen)
 {
@@ -106,8 +107,11 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 
     SDL_HideCursor();
 
-    //const SDL_WindowFlags flags = 0;
+    #if 0
+    const SDL_WindowFlags flags = 0;
+    #else
     const SDL_WindowFlags flags = SDL_WINDOW_FULLSCREEN;
+    #endif
 
     if (!SDL_CreateWindowAndRenderer("Ornament Player", 240, 240, flags, &window, &renderer)) {
         SDL_Log("Couldn't create window/renderer: %s", SDL_GetError());
@@ -156,8 +160,21 @@ SDL_AppResult SDL_AppIterate(void *appstate)
         }
 
         if (!THEORAPLAY_isDecoding(decoder)) {
-            THEORAPLAY_seek(decoder, 0);  // start over.
-            baseticks = now;
+            SDL_FlushAudioStream(audio_stream);
+            if (!pending_frame && !SDL_GetAudioStreamAvailable(audio_stream)) {
+                if (decode_finished_ticks == 0) {
+                    decode_finished_ticks = now;
+                } else if ((now - decode_finished_ticks) >= 3000) {
+                    THEORAPLAY_stopDecode(decoder);
+                    decoder = NULL;
+                    baseticks = 0;
+                    decode_finished_ticks = 0;
+                    if (!setup_movie("ornament.ogv")) {
+                        SDL_DestroyTexture(texture);
+                        texture = NULL;   // just go idle if we fail to reload.
+                    }
+                }
+            }
         }
 
         const Uint64 playback_now = now - baseticks;
@@ -211,6 +228,9 @@ SDL_AppResult SDL_AppIterate(void *appstate)
         SDL_RenderClear(renderer);
         if (texture) {
             SDL_RenderTexture(renderer, texture, NULL, NULL);
+            // hack for video issue.
+            SDL_RenderLine(renderer, 0, 238, 240, 238);
+            SDL_RenderLine(renderer, 0, 239, 240, 239);
         }
     }
 
