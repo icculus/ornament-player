@@ -69,6 +69,10 @@ static bool setup_movie(const char *fname)
     SDL_IOStream *io = SDL_IOFromFile(fullpath, "rb");
     SDL_free(fullpath);
 
+    if (!io) {
+        return false;
+    }
+
     THEORAPLAY_Allocator allocator;
     SDL_zero(allocator);
     allocator.allocate = ornament_theoraplay_allocate;
