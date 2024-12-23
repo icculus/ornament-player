@@ -18,8 +18,7 @@ jobs:
       uses: libsdl-org/setup-sdl@v1
       with:
         version: sdl3-latest
-        cmake-generator: Ninja
     - name: Configure CMake
-      run: cmake -B build -GNinja ${{ matrix.platform.flags }}
+      run: cmake -B build ${{ matrix.platform.flags }}
     - name: Build
       run: cmake --build build/
