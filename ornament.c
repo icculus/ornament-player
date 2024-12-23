@@ -102,14 +102,15 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 
     SDL_HideCursor();
 
-    SDL_WindowFlags flags = 0;
-    //flags |= SDL_WINDOW_FULLSCREEN;
+    //const SDL_WindowFlags flags = 0;
+    const SDL_WindowFlags flags = SDL_WINDOW_FULLSCREEN;
 
     if (!SDL_CreateWindowAndRenderer("Ornament Player", 240, 240, flags, &window, &renderer)) {
         SDL_Log("Couldn't create window/renderer: %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
 
+    SDL_SetRenderVSync(renderer, 1);
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
     SDL_RenderPresent(renderer);
